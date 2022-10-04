@@ -23,25 +23,28 @@ la biomedicina, la biologia evolutiva i la biotecnologia.
 L'esquema a seguir per introduïr aquests conceptes és el següent:
 
 1. Un gen. Amb el cas més simple possible es pretén explicar en què consisteix
-   la descomposició del **valor genotípic**, a pesar de què la utilitat d'aquesta
-   descomposició romandrà obscura, de moment.
+   la descomposició del valor genotípic, abans fins i tot de saber per a què
+   serveix esta descomposició.
 
 2. La població. Només un incís per observar que la descomposició del valor genotípic
    només té sentit en referència a una població concreta. El valor reproductiu d'un
    individu, així com l'efecte de la dominància no són propietats inherents del gen,
-   sinó del gen i de la població.
+   ni de l'individu en sí, sinó del gen o l'individu *i de la població*.
 
 3. Anàlisi de la variància genètica. Una primera motivació per haver descomposat el
    valor genotípic és la partició de la variància genètica en variància additiva i
    variància de dominància.
 
-5. Més d'un gen. Sense epístasi podem explicar casos d'efectes additius entre gens,
+4. Més d'un gen. Sense epístasi podem explicar casos d'efectes additius entre gens,
    com en l'experiment de Herman Nilsson-Ehle amb el color dels grans de blat. Amb
-   epístasi, la cosa es complica.
+   epístasi, la cosa es complica. Amb dades reals es calculen els components de la
+   variància genètica d'una mesura al·lomètrica en una població experimental de dacsa. 
 
 6. Variància ambiental
 
 7. Heretabilitat
+
+8. Resposta a la selecció
 
 
 
@@ -436,15 +439,21 @@ teosinte <- data.frame(
    LocusU = c('$U_{MM}$', '$U_{MM}$', '$U_{MM}$', '$U_{MT}$', '$U_{MT}$', '$U_{MT}$', '$U_{TT}$', '$U_{TT}$', '$U_{TT}$'),
    LocusB = c('$B_{MM}$', '$B_{MT}$', '$B_{TT}$', '$B_{MM}$', '$B_{MT}$', '$B_{TT}$', '$B_{MM}$', '$B_{MT}$', '$B_{TT}$'),
    Longitud = c(18.0, 54.6, 47.8, 40.9, 47.6, 83.6, 61.1, 66.5, 101.7),
-   Frequencia = c(1/16, 1/8, 1/16, 1/8, 1/4, 1/8, 1/16, 1/8, 1/16))
+   Frequencia = round(c(1/16, 1/8, 1/16, 1/8, 1/4, 1/8, 1/16, 1/8, 1/16), 4))
 
-kable(teosinte, booktabs = TRUE, format = 'latex', caption = '', digits = 2,
+kable(teosinte, booktabs = TRUE, format = 'latex', caption = '',
    col.names = c('Locus U', 'Locus B', 'Longitud (mm)', 'Freqüència'), escape = FALSE) %>%
 kable_styling(latex_options = 'hold_position')
 ```
 
 A partir d'aquestes dades, per a cada genotip fix d'un locus podem transformar les dades de
-fenotip a una escala entre 0 i $2a$, on l'heterozigot té un valor genotípic de $(1+k)a$:
+fenotip a una escala entre 0 i $2a$, on l'heterozigot té un valor genotípic de $(1+k)a$. Per
+exemple, entre tots els individus $B_{MT}$: els $U_{MM}$ presenten un valor genotípic
+de 54.6 mm; els $U_{MT}$, de 47.6 mm; i els $U_{TT}$, de 66.5 mm. L'homozigot amb un valor
+menor marca el 0, i per tant hem de restar 54.6 als tres valors: $G_{U_{MM}} = 0$, $G_{U_{MT}}=-7=(1+k)a$,
+i $G_{U_{TT}}=11.9=2a$. D'on deduïm que $a=5.95$ i $k=-2.176$. La taula 2 mostra els valors
+de $a$ i $k$ calculats de la mateixa manera per a cada locus, cada vegada que considerem
+un dels genotips de l'altre locus constant.
 
 ```{r transformacions, echo=FALSE}
 ak <- function(G) {
@@ -460,36 +469,111 @@ ka <- data.frame(
    a = sapply(list(teosinte[1:3,3], teosinte[4:6,3], teosinte[7:9,3], teosinte[c(1,4,7),3], teosinte[c(2,5,8),3], teosinte[c(3,6,9),3]), function(G) ak(G)[1]),
    k = sapply(list(teosinte[1:3,3], teosinte[4:6,3], teosinte[7:9,3], teosinte[c(1,4,7),3], teosinte[c(2,5,8),3], teosinte[c(3,6,9),3]), function(G) ak(G)[2])
 )
-kable(ka, booktabs = TRUE, format = 'latex', caption = '', digits = 2, 
-   col.names = c('Locus focal', "Genotip a l'altre locus", '$k$', '$a$'), escape = FALSE) %>%
+kable(ka, booktabs = TRUE, format = 'latex', caption = '', digits = 3, 
+   col.names = c('Locus focal', "Genotip a l'altre locus", '$a$', '$k$'), escape = FALSE) %>%
 kable_styling(latex_options = 'hold_position')
 ```
 
-Els valors de $a$ i $k$ estimats per a un locus, quan el genotip en l'altre locus és
-constant poden variar perquè els valors genotípics no estiguen mesurats amb prou precisió;
-o bé varien perquè hi ha epístasi: els efectes additius dels al·lels i fins i tot la dominància
-en un locus semblen variar en funció de quin és el genotip en l'altre locus.
+El fet que $a$ i $k$ varien en un mateix locus quan canvia el genotip en l'altre locus
+suggereix una forta epístasi: l'efecte d'un gen sobre el caràcter mesurat depén del
+genotip en l'altre gen. Podríem continuar amb l'estratègia d'estudiar cada locus per separat,
+assumint un únic genotip fix en l'altre locus, i així calcularíem sis valors de $\alpha$, sis
+valors d'$\alpha_1$, sis més d'$\alpha_2$, i sis valors de les variàncies genètiques
+additiva $\sigma^2_A$ i de dominància $\sigma^2_D$. Però és més adequat utilitzar el
+model poligènic i calcular tots els termes de la regressió i les variàncies. A partir
+de les freqüències genotípiques de la taula 1 podem deduir les freqüències al·lèliques,
+que són $p_{B_M}=p_{B_T}=0.5$ en el locus $T$ i $p_{U_M}=p_{U_T}=0.5$ al locus $U$.
+Continuem amb el valor genotípic mitjà, $\mu_G$:
 
-Si suposem que les freqüències dels genotips són les indicades a la taula 1, es poden
-estimar els efectes additius i de dominància, així com les interaccions i els diferents
-components de la variància genètica.
+\begin{align*}
+\mu_G &= \sum P_{ijkl}G_{ijkl}\\
+      &= 0.0625\times 18.0 + 0.1250\times 54.6 + 0.0625\times 47.8\\
+      &\quad + 0.1250\times 40.9 + 0.25\times 47.6 + 0.1250\times 83.6\\
+      &\quad + 0.0625\times 61.1 + 0.1250\times 66.5 + 0.0625\times 101.7\\
+      &= 56.8875
+\end{align*}
 
+Per poder aplicar les fòrmules de l'herència poligènica (equacions 12 i següents),
+necessitem calcular primer les *mitjanes condicionals*. Per exemple, la mitjana
+condicional per als individus que contenen l'al·lel $B_{M}$ és:
 
-### Experiment de Herman Nilsson-Ehle
+\begin{equation*}
+G_{B_M...} = \sum_{j,k,l}P(ijkl | i=B_M)G_{B_Mjkl}
+\end{equation*}
 
-Herman Nilsson-Ehle va creuar en 1909 una varietat de blat amb grans de color roig fosc
-amb una varietat amb grans blancs. La $F_1$ era tota homogènia, de color rosa, tal com
-si tots els individus de la $F_1$ foren heterozigots. En creuar individus de la $F_1$ i
-generar la $F_2$, van aparéixer diferents tonalitats entre el blanc i el roig. La proporció
-de plantes amb llavors blanques en la $F_2$ era aproximadament 1/16, la qual cosa suggereix
-l'acció de 2 gens, amb 2 al·lels cadascun en la determinació del color de l'endosperm.
-En classificar els grans en cinc classes de color (blanc, rosa clar, rosa, rosa fosc i roig),
-les proporcions eren, aproximadament, 1:4:6:4:1.
+On $P(ijkl | i=B_M)$ és la probabilitat d'observar el genotip $ijkl$ sabent que
+al locus $B$ el cromosoma $i$ porta l'al·lel $B_M$. En tant que diferenciem els dos
+cromosomes, aquesta probabilitat és igual al producte de la probabilitat de què l'altre
+cromosoma porte l'al·lel $j$ en el mateix locus, i la probabilitat (indpendent, perquè
+es tracta d'un altre parell cromosòmic) del genotip $kl$ en el locus U. A partir de
+les freqüències dels genotips (Taula 1), es pot calcular així:
 
-En aquest cas, no hi ha dominància (l'heterozigot en un locus té el fenotip intermig entre
-els homozigots del mateix locus, si l'altre locus es manté fixat en un genotip). A més, els
-gens actuen independentment: l'efecte d'un no depén del genotip en l'altre. En aquest cas,
-el valor reproductiu és la suma dels efectes additius dels al·lels als dos loci. I la variància
-additiva serà la suma de les variàncies additives dels dos loci.
+\begin{align*}
+P(ijkl|i=B_M) = 
+\begin{cases}
+   \frac{P(B_{MM}kl)}{P(B_M)} & \quad \text{quan } $j$ \text{ també és } B_M \\
+   \frac{0.5\cdot P(B_{MT}kl)}{P(B_M)} & \quad \text{quan } $j$ \text{ és } B_T
+\end{cases}
+\end{align*}
+
+On $P(B_M)$ és la freqüència al·lèlica de $B_M$, 0.5 en l'exemple.
+És a dir, en la ponderació, els heterozigots compten la meitat, perquè estem comptant
+només els que porten l'al·lel focal ($B_M$ en este cas) en un cromosoma concret (patern
+o matern).
+
+\begin{align*}
+G_{B_M...} =& \frac{0.0625}{0.5}\times 18.0 + \frac{0.125}{0.5}\times 40.9 + \frac{0.0625}{0.5}\times 61.1 \\
+          & + \frac{0.5\times 0.125}{0.5}\times 54.6 + \frac{0.5\times 0.25}{0.5}\times 47.6 + \frac{0.5\times 0.125}{0.5}\times 66.5 \\
+           =& 47.15\\
+G_{B_T...} =& 66.6250\\
+G_{..U_M.} =& 49.3375\\
+G_{..U_T.} =& 64.4375\\
+\end{align*}
+
+D'on podem calcular els efectes additius:
+
+\begin{align*}
+\alpha_{B_M} =& G_{B_M...} - \mu_G\\
+             =& 47.15 - 56.8875 = -9.7375\\
+\alpha_{B_T} =& 9.7375 \\
+\alpha_{U_M} =& -7.5500 \\
+\alpha_{U_T} =& 7.5500
+\end{align*}
+
+Per calcular els efectes de la dominància, cal calcular primer les mitjanes condicionals $G_{B_{MM}..}$,
+$G_{B_{MT}..}$, $G_{B_{TT}..}$, $G_{..U_{MM}}$, $G_{..U_{MT}}$ i $G_{..U_{TT}}$.
+
+\begin{align*}
+G_{B_{MM}..} =& \sum_{k,l}P(ijkl|i,j = B_{MM})G_{B_{MM}kl} \\
+             =& \sum_{k,l}\frac{P(ijkl)}{P(B_{MM})} G_{B_{MM}kl} \\
+             =& \frac{0.0625}{0.25}\times 18.0 + \frac{0.125}{0.25}\times 40.9 + \frac{0.0625}{0.25}\times 61.1\\
+             =& 40.225 \\
+G_{B_{MT}..} =& 54.075 \\
+G_{B_{TT}..} =& 79.175 \\
+G_{..U_{MM}} =& 43.750 \\
+G_{..U_{MT}} =& 54.925 \\
+G_{..U_{TT}} =& 73.950 \\
+\end{align*}
+
+Els efectes de dominància, són doncs:
+
+\begin{align*}
+\delta_{B_{MM}} =& G_{B_{MM}..} - \mu_G - \alpha_{B_M} - \alpha_{B_M} \\
+                =& 40.225 - 56.8875 - (-9.7375) - (-9.7375) \\
+                =& 2.8125 \\
+\delta_{B_{MT}} = -2.8125 \\
+\delta_{B_{TT}} = 2.8125 \\
+\delta_{U_{MM}} = 1.9625 \\
+\delta_{U_{MT}} = -1.9625 \\
+\delta_{U_{TT}} = 1.9625
+\end{align*}
+
+Faltarien per calcular algunes mitjanes condicionals més per poder aleshores 
+calcular els efectes additiu $\times$ additiu, additiu $\times$ dominància
+i de dominància $\times$ dominància. I finalment, calcularíem els components
+de la variància genètica. Però és hora de canviar d'apartat.
+
+## Fonts de variació ambiental
+
 
 # References
