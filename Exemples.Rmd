@@ -1,0 +1,167 @@
+---
+title: "Exemples d'aplicació"
+author: "J. Ignacio Lucas Lledó"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output: pdf_document
+bibliography: references.bib
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage[catalan]{babel}
+---
+
+## Exemple de càlcul dels components del valor genotípic amb dos loci
+
+Mitjançant una sèrie de creuaments, @Doebley1995 van generar un llinatge de teosinte (una espècie
+del genere \emph{Zea} semblant a l'ancestre de la dacsa cultivada, \emph{Zea mays}) amb dos
+petits fragments cromosòmics (en cromosomes diferents) procedents de la dacsa. Les plantes
+d'aquest llinatge híbrid, per tant, teníen els al·lels propis de la dacsa $U_M$ i $B_M$ en els
+loci $U$ i $B$, respectivament. Mentre que el teosinte parental tenia en eixos loci només els
+al·lels propis del teosinte: $U_T$ i $B_T$. En una població experimental produída pel creuament
+repetit dels dos llinatges, hi havia individus amb qualsevol combinació de genotips entre els
+dos loci, des del genotip propi del teosinte $U_{TT}$ $B_{TT}$, fins el genotip propi de la
+dacsa, $U_{MM}$ $B_{MM}$. En un nombre elevat d'individus d'aquesta població es van genotipar
+els dos loci i es van mesurar les longituds entre dos nusos de la canya. La taula 1 dóna
+les longituds mitjanes, en mil·límetres, per a cada genotip (és a dir, els valors genotípics):
+
+```{r teosinte, echo=FALSE}
+library(knitr)
+library(kableExtra)
+teosinte <- data.frame(
+   LocusU = c('$U_{MM}$', '$U_{MM}$', '$U_{MM}$', '$U_{MT}$', '$U_{MT}$', '$U_{MT}$', '$U_{TT}$', '$U_{TT}$', '$U_{TT}$'),
+   LocusB = c('$B_{MM}$', '$B_{MT}$', '$B_{TT}$', '$B_{MM}$', '$B_{MT}$', '$B_{TT}$', '$B_{MM}$', '$B_{MT}$', '$B_{TT}$'),
+   Longitud = c(18.0, 54.6, 47.8, 40.9, 47.6, 83.6, 61.1, 66.5, 101.7),
+   Frequencia = round(c(1/16, 1/8, 1/16, 1/8, 1/4, 1/8, 1/16, 1/8, 1/16), 4))
+
+kable(teosinte, booktabs = TRUE, format = 'latex', caption = '',
+   col.names = c('Locus U', 'Locus B', 'Longitud (mm)', 'Freqüència'), escape = FALSE) %>%
+kable_styling(latex_options = 'hold_position')
+```
+
+A partir d'aquestes dades, per a cada genotip fix d'un locus podem transformar les dades de
+fenotip a una escala entre 0 i $2a$, on l'heterozigot té un valor genotípic de $(1+k)a$. Per
+exemple, entre tots els individus $B_{MT}$: els $U_{MM}$ presenten un valor genotípic
+de 54.6 mm; els $U_{MT}$, de 47.6 mm; i els $U_{TT}$, de 66.5 mm. L'homozigot amb un valor
+menor marca el 0, i per tant hem de restar 54.6 als tres valors: $G_{U_{MM}} = 0$, $G_{U_{MT}}=-7=(1+k)a$,
+i $G_{U_{TT}}=11.9=2a$. D'on deduïm que $a=5.95$ i $k=-2.176$. La taula 2 mostra els valors
+de $a$ i $k$ calculats de la mateixa manera per a cada locus, cada vegada que considerem
+un dels genotips de l'altre locus constant.
+
+```{r transformacions, echo=FALSE}
+ak <- function(G) {
+   stopifnot(length(G) == 3)
+   a <- abs(G[3] - G[1]) / 2
+   k <- ((G[2] - min(G[1], G[3])) / a) - 1
+   return(c(a,k))
+}
+
+ka <- data.frame(
+   Locus = c('B','B','B','U','U','U'),
+   GenoFix = c('$U_{MM}$', '$U_{MT}$', '$U_{TT}$', '$B_{MM}$', '$B_{MT}$', '$B_{TT}$'),
+   a = sapply(list(teosinte[1:3,3], teosinte[4:6,3], teosinte[7:9,3], teosinte[c(1,4,7),3], teosinte[c(2,5,8),3], teosinte[c(3,6,9),3]), function(G) ak(G)[1]),
+   k = sapply(list(teosinte[1:3,3], teosinte[4:6,3], teosinte[7:9,3], teosinte[c(1,4,7),3], teosinte[c(2,5,8),3], teosinte[c(3,6,9),3]), function(G) ak(G)[2])
+)
+kable(ka, booktabs = TRUE, format = 'latex', caption = '', digits = 3,
+   col.names = c('Locus focal', "Genotip a l'altre locus", '$a$', '$k$'), escape = FALSE) %>%
+kable_styling(latex_options = 'hold_position')
+```
+
+El fet que $a$ i $k$ varien en un mateix locus quan canvia el genotip en l'altre locus
+suggereix una forta epístasi: l'efecte d'un gen sobre el caràcter mesurat depén del
+genotip en l'altre gen. Podríem continuar amb l'estratègia d'estudiar cada locus per separat,
+assumint un únic genotip fix en l'altre locus, i així calcularíem sis valors de $\alpha$, sis
+valors d'$\alpha_1$, sis més d'$\alpha_2$, i sis valors de les variàncies genètiques
+additiva $\sigma^2_A$ i de dominància $\sigma^2_D$. Però és més adequat utilitzar el
+model poligènic i calcular tots els termes de la regressió i les variàncies. A partir
+de les freqüències genotípiques de la taula 1 podem deduir les freqüències al·lèliques,
+que són $p_{B_M}=p_{B_T}=0.5$ en el locus $T$ i $p_{U_M}=p_{U_T}=0.5$ al locus $U$.
+Continuem amb el valor genotípic mitjà, $\mu_G$:
+
+\begin{align*}
+\mu_G &= \sum P_{ijkl}G_{ijkl}\\
+      &= 0.0625\times 18.0 + 0.1250\times 54.6 + 0.0625\times 47.8\\
+      &\quad + 0.1250\times 40.9 + 0.25\times 47.6 + 0.1250\times 83.6\\
+      &\quad + 0.0625\times 61.1 + 0.1250\times 66.5 + 0.0625\times 101.7\\
+      &= 56.8875
+\end{align*}
+
+Per poder aplicar les fòrmules de l'herència poligènica (equacions 12 i següents),
+necessitem calcular primer les *mitjanes condicionals*. Per exemple, la mitjana
+condicional per als individus que contenen l'al·lel $B_{M}$ és:
+
+\begin{equation*}
+G_{B_M...} = \sum_{j,k,l}P(ijkl | i=B_M)G_{B_Mjkl}
+\end{equation*}
+
+On $P(ijkl | i=B_M)$ és la probabilitat d'observar el genotip $ijkl$ sabent que
+al locus $B$ el cromosoma $i$ porta l'al·lel $B_M$. En tant que diferenciem els dos
+cromosomes, aquesta probabilitat és igual al producte de la probabilitat de què l'altre
+cromosoma porte l'al·lel $j$ en el mateix locus, i la probabilitat (indpendent, perquè
+es tracta d'un altre parell cromosòmic) del genotip $kl$ en el locus U. A partir de
+les freqüències dels genotips (Taula 1), es pot calcular així:
+
+\begin{align*}
+P(ijkl|i=B_M) =
+\begin{cases}
+   \frac{P(B_{MM}kl)}{P(B_M)} & \quad \text{quan } $j$ \text{ també és } B_M \\
+   \frac{0.5\cdot P(B_{MT}kl)}{P(B_M)} & \quad \text{quan } $j$ \text{ és } B_T
+\end{cases}
+\end{align*}
+
+On $P(B_M)$ és la freqüència al·lèlica de $B_M$, 0.5 en l'exemple.
+És a dir, en la ponderació, els heterozigots compten la meitat, perquè estem comptant
+només els que porten l'al·lel focal ($B_M$ en este cas) en un cromosoma concret (patern
+o matern).
+
+\begin{align*}
+G_{B_M...} =& \frac{0.0625}{0.5}\times 18.0 + \frac{0.125}{0.5}\times 40.9 + \frac{0.0625}{0.5}\times 61.1 \\
+          & + \frac{0.5\times 0.125}{0.5}\times 54.6 + \frac{0.5\times 0.25}{0.5}\times 47.6 + \frac{0.5\times 0.125}{0.5}\times 66.5 \\
+           =& 47.15\\
+G_{B_T...} =& 66.6250\\
+G_{..U_M.} =& 49.3375\\
+G_{..U_T.} =& 64.4375\\
+\end{align*}
+
+D'on podem calcular els efectes additius:
+
+\begin{align*}
+\alpha_{B_M} =& G_{B_M...} - \mu_G\\
+             =& 47.15 - 56.8875 = -9.7375\\
+\alpha_{B_T} =& 9.7375 \\
+\alpha_{U_M} =& -7.5500 \\
+\alpha_{U_T} =& 7.5500
+\end{align*}
+
+Per calcular els efectes de la dominància, cal calcular primer les mitjanes condicionals $G_{B_{MM}..}$,
+$G_{B_{MT}..}$, $G_{B_{TT}..}$, $G_{..U_{MM}}$, $G_{..U_{MT}}$ i $G_{..U_{TT}}$.
+
+\begin{align*}
+G_{B_{MM}..} =& \sum_{k,l}P(ijkl|i,j = B_{MM})G_{B_{MM}kl} \\
+             =& \sum_{k,l}\frac{P(ijkl)}{P(B_{MM})} G_{B_{MM}kl} \\
+             =& \frac{0.0625}{0.25}\times 18.0 + \frac{0.125}{0.25}\times 40.9 + \frac{0.0625}{0.25}\times 61.1\\
+             =& 40.225 \\
+G_{B_{MT}..} =& 54.075 \\
+G_{B_{TT}..} =& 79.175 \\
+G_{..U_{MM}} =& 43.750 \\
+G_{..U_{MT}} =& 54.925 \\
+G_{..U_{TT}} =& 73.950 \\
+\end{align*}
+
+Els efectes de dominància, són doncs:
+
+\begin{align*}
+\delta_{B_{MM}} =& G_{B_{MM}..} - \mu_G - \alpha_{B_M} - \alpha_{B_M} \\
+                =& 40.225 - 56.8875 - (-9.7375) - (-9.7375) \\
+                =& 2.8125 \\
+\delta_{B_{MT}} = -2.8125 \\
+\delta_{B_{TT}} = 2.8125 \\
+\delta_{U_{MM}} = 1.9625 \\
+\delta_{U_{MT}} = -1.9625 \\
+\delta_{U_{TT}} = 1.9625
+\end{align*}
+
+Faltarien per calcular algunes mitjanes condicionals més per poder aleshores
+calcular els efectes additiu $\times$ additiu, additiu $\times$ dominància
+i de dominància $\times$ dominància. I finalment, calcularíem els components
+de la variància genètica. Però és hora de canviar d'apartat.
+
+# References
