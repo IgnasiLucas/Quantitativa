@@ -498,7 +498,7 @@ caràcter quantitatiu es pot mesurar estudiant la semblança d'individus emparen
 Per motius històrics, se sol utilitzar el símbol $h^2$ per representar l'heretabilitat:
 
 \begin{equation}
-h^2 = \frac{\sigma_A}{\sigma_P}
+h^2 = \frac{\sigma^2_A}{\sigma^2_P}
 \end{equation}
 
 L'heretabilitat es pot entendre també com el pendent d'una regressió entre el fenotip
@@ -522,6 +522,6 @@ selecció*. Més concretament:
 - **Diferencial de selecció**: la diferència entre el fenotip mitjà dels progenitors seleccionats
   i el fenotip mitjà de la població.
 - **Resposta a la selecció**: la diferència entre el fenotip mitjà dels descendents i el fenotip
-  mitjà de la població.
+  mitjà de la població parental.
 
 # References
