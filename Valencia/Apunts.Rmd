@@ -40,11 +40,11 @@ L'esquema a seguir per introduïr aquests conceptes és el següent:
    complica, perquè en molts casos hi ha epístasi: relacions no lineals entre l'acció
    dels gens i el caràcter.
 
-6. Fonts de variació ambiental. El fenotip depén de factors genètics i ambientals,
+5. Fonts de variació ambiental. El fenotip depén de factors genètics i ambientals,
    i també és possible incorporar l'efecte de l'ambient en una regressió lineal més
    general. L'objectiu és comprendre el significat dels termes en esta regressió.
 
-7. Heretabilitat. Definim l'heretabilitat i poc més.
+6. Heretabilitat. Definim l'heretabilitat i poc més.
 
 
 ## Un gen
@@ -56,7 +56,7 @@ es mesura en una escala contínua. Si cap altre gen ni l'ambient influeixen en e
 caràcter, hi hauria dos (amb dominància completa) o tres fenotips possibles.
 
 El valor del fenotip determinat pel genotip es representa amb el símbol $G$, i
-a se l'anomena *valor genotípic*, però es mesura en unitats de **fenotip**. L'escala
+se l'anomena *valor genotípic*, però es mesura en unitats de **fenotip**. L'escala
 en què es mesura el fenotip és arbitrària. Per exemple, dues escales útils per als
 càlculs teòrics són les següents (reproducció de la figura 4.4 de @Lynch1998, p. 62):
 
@@ -123,7 +123,7 @@ par(mar = c(5,7,4,4))
 plot(c(N2, N2), c(G, Ghat), type = 'n',
      xlab = expression(N[2]*", nombre d'al·lels "*B[2]),
      ylab = "", xaxt = 'n', yaxt = 'n', las = 1,
-     sub = "(Modificat la figura 4.6 de Lynch i Walsh (1998), pàgina 66.)")
+     sub = "(Modificat de la figura 4.6 de Lynch i Walsh (1998), pàgina 66.)")
 mtext("Valor genotípic, G", side = 2, line = 5)
 abline(h = G,  lty = 2, col = 'gray')
 abline(v = N2, lty = 2, col = 'gray')
@@ -384,7 +384,7 @@ i entre efectes de dominància ($\delta\delta$):
                       &-(\alpha\delta)_{ikl} - (\alpha\delta)_{jkl} - (\alpha\delta)_{ijk} - (\alpha\delta)_{ijl}
 \end{align*}
 
-Així doncs, el valor genotípic, determinat per dos (o més) gens es pot descomposar en una sèrie
+Així doncs, el valor genotípic determinat per dos (o més) gens es pot descomposar en una sèrie
 d'efectes additius, de dominància, additius $\times$ additius, additius $\times$ dominància,
 i de dominància $\times$ dominància. La regressió atribueix primer la major part de la variància
 possible als efectes additius, i va repartint la variància que queda per explicar entre els
@@ -407,7 +407,7 @@ d'un gen influint en un caràcter, també podem distingir diferents fonts de var
 \sigma^2_G = \sigma^2_A + \sigma^2_D + \sigma^2_{AA} + \sigma^2_{AD} + \sigma^2_{DD} + \ldots
 \end{equation}
 
-En genètica quantitativa s'anomena epístasi a totes aquestes interaccions entre els gens, ja
+En genètica quantitativa s'anomena **epístasi** a totes aquestes interaccions entre els gens, ja
 siguen interaccions entre els components additius o entre els additius i els de dominància o
 entre els de dominància. Cal tenir en compte que amb tres gens pot haver interaccions entre els
 efectes additius de qualsevol parell de gens, així com la interacció triple entre els components
@@ -470,18 +470,19 @@ covariància entre el genotip i l'ambient no té per què ser zero. Les altres, 
 manera en què es construeix el model, han de ser zero. La covariància entre el genotip
 i l'ambient representa una associació estadística entre genotips i ambients. És a dir,
 una distribució no aleatòria dels genotips entre els diferents ambients. Aquest component
-de la variància fenotípica és molt difícil de mesurar i sempre pot contribuir a la variància
-observada. Un exemple d'aquesta confusió són els efectes materns, que són ambientals, però
+de la variància fenotípica és molt difícil de distingir de la variància genética, i
+sempre pot estar present a pesar de què no podem mesurar-lo.
+Un exemple d'aquesta covariància són els efectes materns, que són ambientals, però
 que afecten a individus emparentats. Aquesta covariància fa que en la població total la
 variància fenotípica siga major de la que seria si tots els genotips estigueren distribuïts
 a l'atzar entre tots els ambients disponibles.
 
 Cal diferenciar la covariància $\sigma_{G,E}$ de la variància de la interacció entre
 genotip i ambient, $\sigma_I^2$. Aquest component de la variància fenotípica mesura
-la variació de la no-additivitat entre els efectes ambiental i genètic. Una $\sigma_I^2$
-es pot entendre com una diversitat de pendents en les normes de reacció, amb algunes normes
-de reacció paral·leles entre elles i d'altres molt divergents. Mentre que $\sigma_{G,E}$
-parla de la freqüència amb què trobem individus d'un cert genotip en un cert ambient.
+la variació de la no-additivitat entre els efectes ambiental i genètic. $\sigma_I^2$
+es pot entendre com la diversitat de pendents en les normes de reacció, amb algunes normes
+de reacció més paral·leles entre elles i d'altres més divergents. Mentre que $\sigma_{G,E}$
+depén de la freqüència amb què trobem individus d'un cert genotip en un cert ambient.
 
 La variància ambiental més fina que pot mesurar-se és la variància entre els costats
 dret i esquerre d'un animal amb simetria bilateral. Aquesta variància, a vegades important,
@@ -489,8 +490,8 @@ forma part de la variància ambiental especial, $e$.
 
 ## Heretabilitat
 
-L'heretabilitat (en sentit estricte) d'un caràcter quantitatiu és la proporció de la
-variància fenotípica d'una població que es pot atribuir a la variància de valors
+L'heretabilitat (en sentit estricte) d'un caràcter quantitatiu en una població és la proporció de la
+variància fenotípica observada que es pot atribuir a la variància de valors
 reproductius (la part additiva de la variància genètica). L'heretabilitat és el que
 determina la semblança entre individus emparentats. De fet, l'heretabilitat d'un
 caràcter quantitatiu es pot mesurar estudiant la semblança d'individus emparentats.
